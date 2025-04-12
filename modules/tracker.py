@@ -2,60 +2,60 @@ from dataclasses import dataclass
 import datetime
 
 @dataclass
-class Thing:
-    """Physical objects or things a person can claim ownership of.
-    Stores the name, how many, location, and if it is still in the home.
-    Optionally stores the date (YYYY/MM/DD) it entered the home, how much it was purchased for, and its UPC."""
+class Item:
+    """Physical item a person can claim ownership of.
+    Stores the name, how many of the item, location of item, and if it is still in the home.
+    Optionally stores the date it entered the home (enter as "YYYY-MM-DD), how much it was purchased for, and its UPC."""
 
     def __init__(self, name, location, amount=1, inHome="", price="", upc=""):
         """Only name and location are required"""
-        self.name = name            # object or thing name
-        self.amount = amount        # amount of objects or things
-        self.location = location    # location of object or thing
-        self.dateInHome = inHome    # date brought into home, format YYYY, MM, DD
-        self.price = price          # price of object or thing
-        self.upc = upc              # Universal Product Code of object or thing 
-        self.stillOwned = True      # If the object or thing is still owned
+        self.name = name            # item name
+        self.amount = amount        # item amount
+        self.location = location    # location of item
+        self.dateInHome = inHome    # date item was brought into home, format is "YYYY, MM, DD"
+        self.price = price          # price of item
+        self.upc = upc              # Universal Product Code of item 
+        self.stillOwned = True      # If the item is still owned
 
     @property
     def name(self):
-        """Get name of the object or thing"""
+        """Get name of the item"""
         return self.__name
 
     @name.setter
     def name(self, name):
-        """Set name of the object or thing"""
+        """Set name of the item"""
         self.__name = str(name)
 
     @property
     def amount(self):
-        """Get amount of the objects or things"""
+        """Get amount of the item"""
         return self.__amount
 
     @amount.setter
     def amount(self, amount):
-        """Set an amount of the object or thing"""
+        """Set an amount of the item"""
         self.__amount = int(amount)
 
     @property
     def location(self):
-        """Get the physical location of the object or thing"""
+        """Get the physical location of the item"""
         return self.__location
 
     @location.setter
     def location(self, location):
-        """Set the physical location of the object or thing"""
+        """Set the physical location of the item"""
         self.__location = str(location)
 
     @property
     def dateInHome(self):
-        """Get the date the object or thing entered the home"""
+        """Get the date the item entered the home"""
         return self.__dateInHome
 
     @dateInHome.setter
     def dateInHome(self, inHome):
-        """Set the date for the object or thing entering the home
-        Accepts dates in YYYY, MM, DD format, returns YYYY-MM-DD"""
+        """Set the date for the item entering the home
+        Accepts dates in YYYY, MM, DD format, returns date object YYYY-MM-DD"""
         if len(str(inHome)) == 0:
             self.__dateInHome = ""
         else:
@@ -64,22 +64,22 @@ class Thing:
 
     @property
     def price(self):
-        """Get the price of the object or thing"""
+        """Get the price of the item"""
         return self.__price
 
     @price.setter
     def price(self, price):
-        """Set the price of the object or thing"""
+        """Set the price of the item"""
         self.__price = round(float(price), 2)
 
     @property
     def upc(self):
-        """Get the Universal Product Code of the object or thing"""
+        """Get the Universal Product Code of the item"""
         return self.__upc
 
     @upc.setter
     def upc(self, upc):
-        """Set the Universal Product Code of the object or thing"""
+        """Set the Universal Product Code of the item"""
         upc = str(upc)
         if (len(upc) == 12) or (len(upc) == 0):
             self.__upc = upc
@@ -88,16 +88,16 @@ class Thing:
 
     @property
     def stillOwned(self):
-        """Get if the object or thing is still owned"""
+        """Get if the item is still owned"""
         return self.__stillOwned
 
     @stillOwned.setter
     def stillOwned(self, stillOwned):
-        """Set if the object or thing is still owned"""
+        """Set if the item is still owned"""
         self.__stillOwned = bool(stillOwned)
 
     def getStr(self):
-        """Return a string of all the objects attributes
+        """Return a string of all the item's attributes
         Will not include defaults"""
         if self.__stillOwned == False:
             owned = "No"
@@ -105,12 +105,12 @@ class Thing:
             owned = "Yes"
         
         _returnStr = str("Name: " + self.__name + "\n" + \
-                   "Amount:" + str(self.__amount) + "\n" + \
-                   "Location: " + self.__location + "\n" + \
-                   "Owned: " + owned + "\n")
+                         "Location: " + self.__location + "\n" + \
+                         "Item amount:" + str(self.__amount) + "\n" + \
+                         "Item still owned: " + owned + "\n")
 
         if len(str(self.__dateInHome)) != 0:
-            _returnStr += str("Date entered home: " + str(self.__dateInHome) + "\n")
+            _returnStr += str("Date item entered home: " + str(self.__dateInHome) + "\n")
 
         if len(str(self.__price)) != 0:
             _returnStr += str("Price: " + str(self.__price) + "\n")
