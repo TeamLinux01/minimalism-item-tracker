@@ -70,7 +70,10 @@ class Item:
     @price.setter
     def price(self, price):
         """Set the price of the item"""
-        self.__price = round(float(price), 2)
+        if len(str(price)) == 0:
+            self.__price = ""
+        else:
+            self.__price = round(float(price), 2)
 
     @property
     def upc(self):
