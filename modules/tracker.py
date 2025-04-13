@@ -17,6 +17,9 @@ class Item:
         self.upc = upc              # Universal Product Code of item 
         self.stillOwned = True      # If the item is still owned
 
+    def __str__(self):
+        return self.getStr()
+    
     @property
     def name(self):
         """Get name of the item"""
