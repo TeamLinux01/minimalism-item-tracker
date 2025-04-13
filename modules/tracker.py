@@ -1,3 +1,5 @@
+#!/bin/python3
+
 from dataclasses import dataclass
 import datetime
 
@@ -38,6 +40,8 @@ class Item:
     @amount.setter
     def amount(self, amount):
         """Set an amount of the item"""
+        if amount == 0:
+            self.__stillOwned = False
         self.__amount = int(amount)
 
     @property
@@ -101,7 +105,7 @@ class Item:
     def stillOwned(self, stillOwned):
         """Set if the item is still owned"""
         if stillOwned == False: # If it is not owned any more, set the amount to none
-            self.amount = 0
+            self.__amount = 0
         self.__stillOwned = bool(stillOwned)
 
     def getStr(self):
@@ -127,3 +131,21 @@ class Item:
             _returnStr += str("UPC: " + self.__upc + "\n")
 
         return _returnStr
+    
+def main():
+    """ Tests the Item class"""
+    print("This tests the Item class")
+    items = [Item("Chair", "Office"),
+             Item("Desk", "Office"),
+             Item("Table", "Dinning")]
+    printItems(items)
+    items[0].stillOwned = False
+    items[1].amount = 0
+    printItems(items)
+
+def printItems(items):
+    for item in items:
+        print(item)
+
+if __name__ == "__main__":
+    main()
