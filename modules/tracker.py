@@ -100,6 +100,8 @@ class Item:
     @stillOwned.setter
     def stillOwned(self, stillOwned):
         """Set if the item is still owned"""
+        if stillOwned == False: # If it is not owned any more, set the amount to none
+            self.amount = 0
         self.__stillOwned = bool(stillOwned)
 
     def getStr(self):
@@ -112,7 +114,7 @@ class Item:
         
         _returnStr = str("Name: " + self.__name + "\n" + \
                          "Location: " + self.__location + "\n" + \
-                         "Item amount:" + str(self.__amount) + "\n" + \
+                         "Item amount: " + str(self.__amount) + "\n" + \
                          "Item still owned: " + owned + "\n")
 
         if len(str(self.__dateInHome)) != 0:
