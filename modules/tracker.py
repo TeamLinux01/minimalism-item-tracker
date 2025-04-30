@@ -6,14 +6,12 @@ import datetime
 @dataclass
 class Item:
     """Physical item a person can claim ownership of.
-    Stores the name, how many of the item, location of item, and if it is still in the home.
+    Stores the name, how many of the item and if it is still in the home.
     Optionally stores the date it entered the home (enter as "YYYY-MM-DD), how much it was purchased for, and its UPC."""
 
-    def __init__(self, name, location, amount=1, inHome="", price="", upc=""):
-        """Only name and location are required"""
+    def __init__(self, name, amount=1, inHome="", price="", upc=""):
         self.name = name            # item name
         self.amount = amount        # item amount
-        self.location = location    # location of item
         self.dateInHome = inHome    # date item was brought into home, format is "YYYY, MM, DD"
         self.price = price          # price of item
         self.upc = upc              # Universal Product Code of item 
@@ -117,7 +115,6 @@ class Item:
             owned = "Yes"
         
         _returnStr = str("Name: " + self.__name + "\n" + \
-                         "Location: " + self.__location + "\n" + \
                          "Item amount: " + str(self.__amount) + "\n" + \
                          "Item still owned: " + owned + "\n")
 
@@ -131,17 +128,65 @@ class Item:
             _returnStr += str("UPC: " + self.__upc + "\n")
 
         return _returnStr
+
+
+@dataclass
+class Location:
+
+    def __init__(self, name, parentLocation=""):
+        self.__name = name
+        if parentLocation == "":
+            self.__parentLocation = Location("earth", "universe")
+        else:
+            self.__parentLocation = parentLocation
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def name(self):
+        """Get name of location"""
+        return str(self.__name)
+
+    @name.setter
+    def name(self, name):
+        """Set name of location"""
+        self.__name = name
+
+    @property
+    def parentLocation(self):
+        """Get parent location"""
+        return self.__parentLocation
+    
+    @parentLocation.setter
+    def parentLocation(self, parentLocation):
+        """Set parent location"""
+        self.__parentLocation = parentLocation
+
+    def relativeLocation(self):
+        _printLocation = ""
+        _currentLocation = self
+        while _currentLocation.name != "earth":
+            _printLocation += str(_currentLocation.name) + " > "
+            _currentLocation = _currentLocation.parentLocation
+        print(_printLocation)
     
 def main():
-    """ Tests the Item class"""
+    """ Tests the Item and Location classes"""
     print("This tests the Item class")
-    items = [Item("Chair", "Office"),
-             Item("Desk", "Office"),
-             Item("Table", "Dinning")]
+    items = [Item("Chair"),
+             Item("Desk"),
+             Item("Table")]
     printItems(items)
     items[0].stillOwned = False
     items[1].amount = 0
     printItems(items)
+
+    print("Test the Location class")
+    house = Location("house")
+    kitchen = Location("kitchen", house)
+    cabinet = Location("cabinet", kitchen)
+    cabinet.relativeLocation()
 
 def printItems(items):
     for item in items:
