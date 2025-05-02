@@ -1,21 +1,18 @@
 #!/bin/python3
 
 from dataclasses import dataclass
-import datetime
 
 @dataclass
 class Item:
     """Physical item a person can claim ownership of.
     Stores the name, how many of the item and if it is still in the home.
-    Optionally stores the date it entered the home (enter as "YYYY-MM-DD), how much it was purchased for, and its UPC."""
+    Optionally stores its price."""
 
-    def __init__(self, name, location="", amount=1, inHome="", price="", upc=""):
+    def __init__(self, name, location="", amount=1, price=""):
         self.name = name            # item name
         self.location = location    # item location
         self.amount = amount        # item amount
-        self.dateInHome = inHome    # date item was brought into home, format is "YYYY, MM, DD"
         self.price = price          # price of item
-        self.upc = upc              # Universal Product Code of item 
         self.stillOwned = True      # If the item is still owned
 
     def __str__(self):
@@ -54,21 +51,6 @@ class Item:
         self.__location = str(location)
 
     @property
-    def dateInHome(self):
-        """Get the date the item entered the home"""
-        return self.__dateInHome
-
-    @dateInHome.setter
-    def dateInHome(self, inHome):
-        """Set the date for the item entering the home
-        Accepts dates in YYYY, MM, DD format, returns date object YYYY-MM-DD"""
-        if len(str(inHome)) == 0:
-            self.__dateInHome = ""
-        else:
-            _dt = datetime.datetime.strptime(inHome, '%Y, %m, %d')
-            self.__dateInHome = datetime.date(_dt.year, _dt.month, _dt.day)
-
-    @property
     def price(self):
         """Get the price of the item"""
         return self.__price
@@ -80,20 +62,6 @@ class Item:
             self.__price = ""
         else:
             self.__price = round(float(price), 2)
-
-    @property
-    def upc(self):
-        """Get the Universal Product Code of the item"""
-        return self.__upc
-
-    @upc.setter
-    def upc(self, upc):
-        """Set the Universal Product Code of the item"""
-        upc = str(upc)
-        if (len(upc) == 12) or (len(upc) == 0):
-            self.__upc = upc
-        else:
-            raise ValueError("UPC bar codes are 12 digits")
 
     @property
     def stillOwned(self):
@@ -115,19 +83,15 @@ class Item:
         elif self.__stillOwned == True:
             owned = "Yes"
         
-        _returnStr = str("Name: " + self.__name + "\n" + \
-                         "Item amount: " + str(self.__amount) + "\n" + \
-                         "Location: " + str(self.location) + "\n" + \
-                         "Item still owned: " + owned + "\n")
+        _returnStr = str("Name: " + self.__name + ", " + \
+                         "Item amount: " + str(self.__amount) + ", " + \
+                         "Item still owned: " + owned)
 
-        if len(str(self.__dateInHome)) != 0:
-            _returnStr += str("Date item entered home: " + str(self.__dateInHome) + "\n")
+        if len(str(self.__location)) != 0:
+            _returnStr += str(", Location: " + str(self.__location))
 
         if len(str(self.__price)) != 0:
-            _returnStr += str("Price: " + str(self.__price) + "\n")
-        
-        if len(str(self.__upc)) != 0:
-            _returnStr += str("UPC: " + self.__upc + "\n")
+            _returnStr += str(", Price: $" + str(self.__price))
 
         return _returnStr
     
@@ -143,7 +107,7 @@ def main():
     items[1].amount = 0
     printItems(items)
 
-    items.append(Item("Spoon", "cabinet", 3, '2020, 03, 04'))
+    items.append(Item("Spoon", "cabinet", 3, 5))
     printItems(items)
 
 def printItems(items):
