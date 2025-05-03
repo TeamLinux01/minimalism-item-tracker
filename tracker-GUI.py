@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox, Toplevel
 from modules.tracker import Item
+import modules.database as db
 
 class MainFrame(ttk.Frame):
     """The main window frame to draw the interface"""
@@ -21,7 +22,11 @@ class MainFrame(ttk.Frame):
         self._itemAmount = 0
         self._itemPrice = 0
 
-        self._items = [Item("Computer", "Office", 1, 2000), Item("Spoon", "Kitchen", 10), Item("TV", "Livingroom", 1, 1000)] # list of all the item objects
+        self._items = [] # list of all the item objects
+
+        db.connect()
+        db.check_database()
+
         self.RefreshDisplayData() # Enters any data from initial load into the big textbox
 
         self.initComponents()
@@ -119,10 +124,10 @@ class CommandFrame(ttk.Frame):
         self.buttonDeleteItem = displayButton(self, text="Delete Item", command=self.DeleteItem).grid(
             column=0, row=2, **_gridArgs
         )
-        self.buttonSaveData = displayButton(self, text="Save Data").grid(
+        self.buttonSaveData = displayButton(self, text="Save Data", command=self.SaveData).grid(
             column=1, row=0, **_gridArgs
         )
-        self.buttonLoadData = displayButton(self, text="Load Data").grid(
+        self.buttonLoadData = displayButton(self, text="Load Data", command=self.LoadData).grid(
             column=1, row=1, **_gridArgs
         )
         self.buttonExportData = displayButton(self, text="Export CSV").grid(
@@ -140,6 +145,24 @@ class CommandFrame(ttk.Frame):
     
     def DeleteItem(self):
         self.deleteWindow = DeleteWindow(self.mainframe, master=root).resizable(0, 0)
+
+    def SaveData(self):
+        if len(self.mainframe._items) == 0 and len(db.check_database()) != 0:
+            if messagebox.askokcancel("Delete database?", "Would you like to delete the database?") == True:
+                db.clearDatabase()
+                for _item in self.mainframe._items:
+                    db.add_item(_item)
+        else:
+            db.clearDatabase()
+            for _item in self.mainframe._items:
+                db.add_item(_item)  
+
+    def LoadData(self):
+        self.databaseItems = db.load_data()
+        self.mainframe._items.clear()
+        for item in self.databaseItems:
+            self.mainframe._items.append(Item(name=item['name'], amount=item['amount'], location=item['location'], price=item['price']))
+        self.mainframe.RefreshDisplayData()
 
 class TextFrame(ttk.Frame):
     def __init__(self, parent):
