@@ -5,15 +5,14 @@ from dataclasses import dataclass
 @dataclass
 class Item:
     """Physical item a person can claim ownership of.
-    Stores the name, how many of the item and if it is still in the home.
-    Optionally stores its price."""
+    Stores the name and how many of the item.
+    Optionally stores its location and price."""
 
     def __init__(self, name, location="", amount=1, price=""):
         self.name = name            # item name
         self.location = location    # item location
         self.amount = amount        # item amount
         self.price = price          # price of item
-        self.stillOwned = True      # If the item is still owned
 
     def __str__(self):
         return self.getStr()
@@ -36,8 +35,6 @@ class Item:
     @amount.setter
     def amount(self, amount):
         """Set an amount of the item"""
-        if amount == 0:
-            self.__stillOwned = False
         self.__amount = int(amount)
 
     @property
@@ -63,29 +60,11 @@ class Item:
         else:
             self.__price = round(float(price), 2)
 
-    @property
-    def stillOwned(self):
-        """Get if the item is still owned"""
-        return self.__stillOwned
-
-    @stillOwned.setter
-    def stillOwned(self, stillOwned):
-        """Set if the item is still owned"""
-        if stillOwned == False: # If it is not owned any more, set the amount to none
-            self.__amount = 0
-        self.__stillOwned = bool(stillOwned)
-
     def getStr(self):
         """Return a string of all the item's attributes
         Will not include defaults"""
-        if self.__stillOwned == False:
-            owned = "No"
-        elif self.__stillOwned == True:
-            owned = "Yes"
-        
         _returnStr = str("Name: " + self.__name + ", " + \
-                         "Item amount: " + str(self.__amount) + ", " + \
-                         "Item still owned: " + owned)
+                         "Item amount: " + str(self.__amount))
 
         if len(str(self.__location)) != 0:
             _returnStr += str(", Location: " + str(self.__location))
@@ -103,11 +82,13 @@ def main():
              Item("Desk"),
              Item("Table")]
     printItems(items)
-    items[0].stillOwned = False
     items[1].amount = 0
     printItems(items)
 
     items.append(Item("Spoon", "cabinet", 3, 5))
+    printItems(items)
+    print()
+    items[0].name = "Boat"
     printItems(items)
 
 def printItems(items):

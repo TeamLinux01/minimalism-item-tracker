@@ -34,7 +34,10 @@ class MainFrame(ttk.Frame):
     def RefreshTextbox(self):
         self.textFrame.itemsText.configure(state='normal')
         self.textFrame.itemsText.delete('1.0', 'end')
-        self.textFrame.itemsText.insert('end', self._items)
+        for _item in self._items:
+            self.textFrame.itemsText.insert('end', _item)
+            self.textFrame.itemsText.insert('end', '\n')
+
         self.textFrame.itemsText.configure(state='disabled')
 
 class CommandFrame(ttk.Frame):
@@ -80,10 +83,6 @@ class TextFrame(ttk.Frame):
 
         scrollBar.pack(side=tk.RIGHT, fill=tk.Y)
         self.itemsText.pack(side=tk.LEFT)
-
-    def UpdateText(self):
-        self.mainframe._items.append(Item(self.mainframe._itemName, self.mainframe._itemLocation, self.mainframe._itemAmount, self.mainframe._itemPrice))
-        self.mainframe.RefreshTextbox()
 
 class AddWindow(Toplevel):
     def __init__(self, parent, master=None):
@@ -185,7 +184,8 @@ class AddItemFrame(ttk.Frame):
         self.mainframe._itemLocation = self._itemLocation.get()
         self.mainframe._itemAmount = self._itemAmount.get()
         self.mainframe._itemPrice = self._itemPrice.get()
-        self.mainframe.textFrame.UpdateText()
+        self.mainframe._items.append(Item(self.mainframe._itemName, self.mainframe._itemLocation, self.mainframe._itemAmount, self.mainframe._itemPrice))
+        self.mainframe.RefreshTextbox()
         self.parent.destroy()
 
 class EditWindow(Toplevel):
@@ -232,7 +232,13 @@ class EditItemFrame(ttk.Frame):
         self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=vcmd)
         self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=vcmd)
 
-        self.comboboxIndex['values'] = ('1', '2', '3')
+        comboboxIndexValues = []
+        i = 1
+        for _item in self._items:
+            comboboxIndexValues.append(i)
+            i += 1
+
+        self.comboboxIndex['values'] = comboboxIndexValues
         self.comboboxIndex['state'] = 'readonly'
 
         def callback(*args):
@@ -241,7 +247,7 @@ class EditItemFrame(ttk.Frame):
         self.comboboxIndex.bind("<<ComboboxSelected>>", callback)
 
         self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
-        self.enterButton = displayButton(self, text="Enter")
+        self.enterButton = displayButton(self, text="Enter", command=self.EditItem)
 
         _labelGrid = {"padx":2, "pady":2}
         _entryGrid = {"padx":2, "pady":2}
@@ -320,6 +326,15 @@ class EditItemFrame(ttk.Frame):
     def Cancel(self):
         self.parent.destroy()
 
+    def EditItem(self):
+        index = int(self.comboboxIndex.get()) - 1
+        self._items[index].name = self.entryName.get()
+        self._items[index].location = self.entryLocation.get()
+        self._items[index].amount = self.entryAmount.get()
+        self._items[index].price = self.entryPrice.get()
+        self.mainframe.RefreshTextbox()
+        self.parent.destroy()
+
 class DeleteWindow(Toplevel):
     def __init__(self, parent, master=None):
         Toplevel.__init__(self, master)
@@ -363,16 +378,22 @@ class DeleteItemFrame(ttk.Frame):
         for _entry in self._entries:
             _entry['state'] = 'readonly'
 
-        self.comboboxIndex['values'] = ('1', '2', '3')
+        comboboxIndexValues = []
+        i = 1
+        for _item in self._items:
+            comboboxIndexValues.append(i)
+            i += 1
+
+        self.comboboxIndex['values'] = comboboxIndexValues
         self.comboboxIndex['state'] = 'readonly'
 
         def callback(*args):
             self.RefreshData(int(self.comboboxIndex.get())-1)
 
         self.comboboxIndex.bind("<<ComboboxSelected>>", callback)
-        
+
         self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
-        self.enterButton = displayButton(self, text="Enter")
+        self.enterButton = displayButton(self, text="Enter", command=self.DeleteItem)
 
         _labelGrid = {"padx":2, "pady":2}
         _entryGrid = {"padx":2, "pady":2}
@@ -442,6 +463,12 @@ class DeleteItemFrame(ttk.Frame):
             _entry['state'] = 'readonly'
 
     def Cancel(self):
+        self.parent.destroy()
+
+    def DeleteItem(self):
+        index = int(self.comboboxIndex.get()) - 1
+        del self._items[index]
+        self.mainframe.RefreshTextbox()
         self.parent.destroy()
 
 class displayLabel(ttk.Label):
