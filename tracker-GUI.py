@@ -51,9 +51,9 @@ class MainFrame(ttk.Frame):
         """Clears the big textbox, inserts the item data in each line"""
         self.textFrame.itemsText.configure(state='normal')      # Required to write data to the big textbox
         self.textFrame.itemsText.delete('1.0', 'end')           # Delete all text in the big textbox
+        self.textFrame.itemsText.insert('end', 'Name:\t\t\t\t\t\t\t\tAmount:\t\t\tLocation:\t\t\t\t\t\t\t\tPrice:\n')   # Draw header
         for _item in self._items:                               # Add all items in the list to the big textbox, linebreak after each time
-            self.textFrame.itemsText.insert('end', _item)
-            self.textFrame.itemsText.insert('end', '\n')
+            self.textFrame.itemsText.insert('end', _item.name + '\t\t\t\t\t\t\t\t' + str(_item.amount) + '\t\t\t' + _item.location + '\t\t\t\t\t\t\t\t$' + str(_item.price) + '\n')
 
         self.textFrame.itemsText.configure(state='disabled')    # Make big textbox readonly again
 
