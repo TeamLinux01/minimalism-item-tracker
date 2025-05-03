@@ -82,7 +82,7 @@ def main():
              Item("Desk"),
              Item("Table")]
     printItems(items)
-    items[1].amount = 0
+    items[1].amount = 6.33
     printItems(items)
 
     items.append(Item("Spoon", "cabinet", 3, 5))

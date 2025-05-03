@@ -5,38 +5,44 @@ from tkinter import ttk, messagebox, Toplevel
 from modules.tracker import Item
 
 class MainFrame(ttk.Frame):
+    """The main window frame to draw the interface"""
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent, padding="2 2 2 2")
         self.parent = parent
-        self.textFrame = TextFrame(self)
-        self.commandFrame = CommandFrame(self)
-        self.statsFrame = StatsFrame(self)
+        self.vcmd = (self.register(self.Validate),              # validation variable to check entry boxes for just numbers
+                '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
+        self.textFrame = TextFrame(self)                        # Frame for the big textbox
+        self.commandFrame = CommandFrame(self)                  # Frame where the add, edit and delete buttons live
+        self.statsFrame = StatsFrame(self)                      # Frame that shows the total types, amounts and price
 
+        # Initialize the temp storage variables for what will be put into the Item class objects
         self._itemName = ""
         self._itemLocation = ""
         self._itemAmount = 0
         self._itemPrice = 0
 
-        self._items = [Item("Computer", "Office", 1, 2000), Item("Spoon", "Kitchen", 10), Item("TV", "Livingroom", 1, 1000)]
-        self.RefreshTextbox()
+        self._items = [Item("Computer", "Office", 1, 2000), Item("Spoon", "Kitchen", 10), Item("TV", "Livingroom", 1, 1000)] # list of all the item objects
+        self.RefreshDisplayData() # Enters any data from initial load into the big textbox
 
         self.initComponents()
 
     def initComponents(self):
+        """Initial drawing of the frames onto the main frame"""
         self.pack(fill=tk.BOTH, expand=True)
 
+        # command buttons on top, big textbox in the middle, stats on the bottom
         self.commandFrame.grid(
             column=0, row=0
         )
         self.textFrame.grid(
             column=0, row=1
         )
-
         self.statsFrame.grid(
             column=0, row=2
         )
 
-    def RefreshTextbox(self):
+    def RefreshDisplayData(self):
+        """Clears the big textbox, inserts the item data in each line"""
         self.textFrame.itemsText.configure(state='normal')
         self.textFrame.itemsText.delete('1.0', 'end')
         for _item in self._items:
@@ -66,7 +72,20 @@ class MainFrame(ttk.Frame):
         for entry in self.statsFrame._entries:
             entry['state'] = 'readonly'
 
-    def validate(self, action, index, value_if_allowed,
+    def RefreshInputData(self, parent, index):
+        i = index
+        parent._itemIndex = i+1
+        parent.comboboxIndex.set(parent._itemIndex)
+        parent._itemName = parent._items[i].name
+        parent.entryName.set_text(parent._itemName)
+        parent._itemLocation = parent._items[i].location
+        parent.entryLocation.set_text(parent._itemLocation)
+        parent._itemAmount = parent._items[i].amount
+        parent.entryAmount.set_text(parent._itemAmount)
+        parent._itemPrice = parent._items[i].price
+        parent.entryPrice.set_text(parent._itemPrice)
+
+    def Validate(self, action, index, value_if_allowed,
                        prior_value, text, validation_type, trigger_type, widget_name):
         if value_if_allowed:
             try:
@@ -74,7 +93,7 @@ class MainFrame(ttk.Frame):
                 return True
             except ValueError:
                 return False
-        elif value_if_allowed is "":
+        elif value_if_allowed == "":
             return True
         else:
             return False
@@ -89,16 +108,28 @@ class CommandFrame(ttk.Frame):
 
     def initComponents(self):
 
-        _gridGrid = {"padx":100, "pady":5}
+        _gridArgs = {"padx":90, "pady":5}
         
-        self.addItemButton = displayButton(self, text="Add Item", command=self.AddItem).grid(
-            column=0, row=0, **_gridGrid
+        self.buttonAddItem = displayButton(self, text="Add Item", command=self.AddItem).grid(
+            column=0, row=0, **_gridArgs
         )
-        self.editItemButton = displayButton(self, text="Edit Item", command=self.EditItem).grid(
-            column=0, row=1, **_gridGrid
+        self.buttonEditItem = displayButton(self, text="Edit Item", command=self.EditItem).grid(
+            column=0, row=1, **_gridArgs
         )
-        self.deleteItemButton = displayButton(self, text="Delete Item", command=self.DeleteItem).grid(
-            column=0, row=2, **_gridGrid
+        self.buttonDeleteItem = displayButton(self, text="Delete Item", command=self.DeleteItem).grid(
+            column=0, row=2, **_gridArgs
+        )
+        self.buttonSaveData = displayButton(self, text="Save Data").grid(
+            column=1, row=0, **_gridArgs
+        )
+        self.buttonLoadData = displayButton(self, text="Load Data").grid(
+            column=1, row=1, **_gridArgs
+        )
+        self.buttonExportData = displayButton(self, text="Export CSV").grid(
+            column=2, row=0, **_gridArgs
+        )
+        self.buttonImportData = displayButton(self, text="Import CSV").grid(
+            column=2, row=1, **_gridArgs
         )
     
     def AddItem(self):
@@ -139,7 +170,7 @@ class StatsFrame(ttk.Frame):
 
         self.labelTotalItems = displayLabel(self, width=_width, text="Total items types:")
         self.labelTotalAmount = displayLabel(self, width=_width, text="Total items amount:")
-        self.labelTotalPrice = displayLabel(self, width=_width, text="Total items price:")
+        self.labelTotalPrice = displayLabel(self, width=_width, text="Total items price: $")
 
         self.entryTotalItems = displayEntry(self, textvariable=self.totalItems)
         self.entryTotalAmount = displayEntry(self, textvariable=self.totalAmount)
@@ -197,9 +228,6 @@ class AddItemFrame(ttk.Frame):
     def initComponents(self):
         self.pack(fill=tk.BOTH, expand=True)
 
-        vcmd = (self.register(self.mainframe.validate),
-                '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-
         self.labelName = displayLabel(self, text="Name:")
         self.labelLocation = displayLabel(self, text="Location:")
         self.labelAmount = displayLabel(self, text="Amount:")
@@ -207,8 +235,8 @@ class AddItemFrame(ttk.Frame):
 
         self.entryName = displayEntry(self, textvariable=self._itemName)
         self.entryLocation = displayEntry(self, textvariable=self._itemLocation)
-        self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=vcmd)
-        self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=vcmd)
+        self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=self.mainframe.vcmd)
+        self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=self.mainframe.vcmd)
 
         self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
         self.enterButton = displayButton(self, text="Enter", command=self.AddItem)
@@ -261,7 +289,7 @@ class AddItemFrame(ttk.Frame):
         self.mainframe._itemAmount = self._itemAmount.get()
         self.mainframe._itemPrice = self._itemPrice.get()
         self.mainframe._items.append(Item(self.mainframe._itemName, self.mainframe._itemLocation, self.mainframe._itemAmount, self.mainframe._itemPrice))
-        self.mainframe.RefreshTextbox()
+        self.mainframe.RefreshDisplayData()
         self.parent.destroy()
 
 class EditWindow(Toplevel):
@@ -280,7 +308,6 @@ class EditItemFrame(ttk.Frame):
         self.mainframe = parent.mainframe
         self._items = self.mainframe._items
 
-
         self._itemIndex = tk.IntVar()
         self._itemName = tk.StringVar()
         self._itemLocation = tk.StringVar()
@@ -292,9 +319,6 @@ class EditItemFrame(ttk.Frame):
     def initComponents(self):
         self.pack(fill=tk.BOTH, expand=True)
 
-        vcmd = (self.register(self.mainframe.validate),
-                '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-
         self.labelIndex = displayLabel(self, text="Item Index:")
         self.labelName = displayLabel(self, text="Name:")
         self.labelLocation = displayLabel(self, text="Location:")
@@ -305,8 +329,8 @@ class EditItemFrame(ttk.Frame):
 
         self.entryName = displayEntry(self, textvariable=self._itemName)
         self.entryLocation = displayEntry(self, textvariable=self._itemLocation)
-        self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=vcmd)
-        self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=vcmd)
+        self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=self.mainframe.vcmd)
+        self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=self.mainframe.vcmd)
 
         comboboxIndexValues = []
         i = 1
@@ -317,11 +341,12 @@ class EditItemFrame(ttk.Frame):
         self.comboboxIndex['values'] = comboboxIndexValues
         self.comboboxIndex['state'] = 'readonly'
 
-        def callback(*args):
+        # Update the entries displayed when the combobox input changes
+        def ComboboxCallback(*args):
             self.RefreshData(int(self.comboboxIndex.get())-1)
+        self.comboboxIndex.bind("<<ComboboxSelected>>", ComboboxCallback)
 
-        self.comboboxIndex.bind("<<ComboboxSelected>>", callback)
-
+        # create the Cancel and Enter button objects, cancel close the window and edit changes when is in the entry boxes associate with the Item object
         self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
         self.enterButton = displayButton(self, text="Enter", command=self.EditItem)
 
@@ -371,20 +396,10 @@ class EditItemFrame(ttk.Frame):
             column=3, row=3, **_buttonGrid
         )
 
-        self.RefreshData(0)
+        self.mainframe.RefreshInputData(self, 0)
 
     def RefreshData(self, index):
-        i = index
-        self._itemIndex = i+1
-        self.comboboxIndex.set(self._itemIndex)
-        self._itemName = self._items[i].name
-        self.entryName.set_text(self._itemName)
-        self._itemLocation = self._items[i].location
-        self.entryLocation.set_text(self._itemLocation)
-        self._itemAmount = self._items[i].amount
-        self.entryAmount.set_text(self._itemAmount)
-        self._itemPrice = self._items[i].price
-        self.entryPrice.set_text(self._itemPrice)
+        self.mainframe.RefreshInputData(self, index)
 
     def Cancel(self):
         self.parent.destroy()
@@ -393,9 +408,9 @@ class EditItemFrame(ttk.Frame):
         index = int(self.comboboxIndex.get()) - 1
         self._items[index].name = self.entryName.get()
         self._items[index].location = self.entryLocation.get()
-        self._items[index].amount = self.entryAmount.get()
+        self._items[index].amount = round(float(self.entryAmount.get()), 0)
         self._items[index].price = self.entryPrice.get()
-        self.mainframe.RefreshTextbox()
+        self.mainframe.RefreshDisplayData()
         self.parent.destroy()
 
 class DeleteWindow(Toplevel):
@@ -450,10 +465,10 @@ class DeleteItemFrame(ttk.Frame):
         self.comboboxIndex['values'] = comboboxIndexValues
         self.comboboxIndex['state'] = 'readonly'
 
-        def callback(*args):
+        # Update the entries displayed when the combobox input changes
+        def ComboboxCallback(*args):
             self.RefreshData(int(self.comboboxIndex.get())-1)
-
-        self.comboboxIndex.bind("<<ComboboxSelected>>", callback)
+        self.comboboxIndex.bind("<<ComboboxSelected>>", ComboboxCallback)
 
         self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
         self.enterButton = displayButton(self, text="Enter", command=self.DeleteItem)
@@ -510,17 +525,7 @@ class DeleteItemFrame(ttk.Frame):
         for _entry in self._entries:
             _entry['state'] = 'normal'
 
-        i = index
-        self._itemIndex = i+1
-        self.comboboxIndex.set(self._itemIndex)
-        self._itemName = self._items[i].name
-        self.entryName.set_text(self._itemName)
-        self._itemLocation = self._items[i].location
-        self.entryLocation.set_text(self._itemLocation)
-        self._itemAmount = self._items[i].amount
-        self.entryAmount.set_text(self._itemAmount)
-        self._itemPrice = self._items[i].price
-        self.entryPrice.set_text(self._itemPrice)
+        self.mainframe.RefreshInputData(self, index)
 
         for _entry in self._entries:
             _entry['state'] = 'readonly'
@@ -531,7 +536,7 @@ class DeleteItemFrame(ttk.Frame):
     def DeleteItem(self):
         index = int(self.comboboxIndex.get()) - 1
         del self._items[index]
-        self.mainframe.RefreshTextbox()
+        self.mainframe.RefreshDisplayData()
         self.parent.destroy()
 
 class displayLabel(ttk.Label):
