@@ -10,13 +10,14 @@ class MainFrame(ttk.Frame):
         self.parent = parent
         self.textFrame = TextFrame(self)
         self.commandFrame = CommandFrame(self)
+        self.statsFrame = StatsFrame(self)
 
         self._itemName = ""
         self._itemLocation = ""
         self._itemAmount = 0
         self._itemPrice = 0
 
-        self._items = [Item("Computer", "Office", 1, 2000), Item("Spoon", "Kitchen", 10, 2), Item("TV", "Livingroom", 1, 1000)]
+        self._items = [Item("Computer", "Office", 1, 2000), Item("Spoon", "Kitchen", 10), Item("TV", "Livingroom", 1, 1000)]
         self.RefreshTextbox()
 
         self.initComponents()
@@ -31,6 +32,10 @@ class MainFrame(ttk.Frame):
             column=0, row=1
         )
 
+        self.statsFrame.grid(
+            column=0, row=2
+        )
+
     def RefreshTextbox(self):
         self.textFrame.itemsText.configure(state='normal')
         self.textFrame.itemsText.delete('1.0', 'end')
@@ -40,6 +45,40 @@ class MainFrame(ttk.Frame):
 
         self.textFrame.itemsText.configure(state='disabled')
 
+        for entry in self.statsFrame._entries:
+            entry['state'] = 'normal'
+        
+        _totalAmount = 0
+        _totalPrice = 0
+        for item in self._items:
+            _totalAmount += item.amount
+            if item.price == "":
+                _price = 0
+            else:
+                _price = item.amount * item.price
+
+            _totalPrice += _price
+        
+        self.statsFrame.entryTotalItems.set_text(len(self._items))
+        self.statsFrame.entryTotalAmount.set_text(_totalAmount)
+        self.statsFrame.entryTotalPrice.set_text(_totalPrice)
+
+        for entry in self.statsFrame._entries:
+            entry['state'] = 'readonly'
+
+    def validate(self, action, index, value_if_allowed,
+                       prior_value, text, validation_type, trigger_type, widget_name):
+        if value_if_allowed:
+            try:
+                float(value_if_allowed)
+                return True
+            except ValueError:
+                return False
+        elif value_if_allowed is "":
+            return True
+        else:
+            return False
+        
 class CommandFrame(ttk.Frame):
     def __init__(self, parent):
         ttk.Frame.__init__(self, parent, borderwidth=5, relief="groove", padding="5 5 5 5")
@@ -84,6 +123,54 @@ class TextFrame(ttk.Frame):
         scrollBar.pack(side=tk.RIGHT, fill=tk.Y)
         self.itemsText.pack(side=tk.LEFT)
 
+class StatsFrame(ttk.Frame):
+    def __init__(self, parent):
+        ttk.Frame.__init__(self, parent)
+        self.parent = parent
+        self.mainframe = parent
+
+        self.totalItems = tk.IntVar()
+        self.totalAmount = tk.IntVar()
+        self.totalPrice = tk.IntVar()
+
+        _labelGrid = {"padx":2, "pady":0}
+        _entryGrid = {"padx":2, "pady":0}
+        _width = {"width":22}
+
+        self.labelTotalItems = displayLabel(self, width=_width, text="Total items types:")
+        self.labelTotalAmount = displayLabel(self, width=_width, text="Total items amount:")
+        self.labelTotalPrice = displayLabel(self, width=_width, text="Total items price:")
+
+        self.entryTotalItems = displayEntry(self, textvariable=self.totalItems)
+        self.entryTotalAmount = displayEntry(self, textvariable=self.totalAmount)
+        self.entryTotalPrice = displayEntry(self, textvariable=self.totalPrice)
+
+        self._entries = [self.entryTotalItems, self.entryTotalAmount, self.entryTotalPrice]
+
+        self.labelTotalItems.grid(
+            column=0, row=0, **_labelGrid
+        )
+        self.entryTotalItems.grid(
+            column=1, row=0, **_entryGrid
+        )
+
+        self.labelTotalAmount.grid(
+            column=2, row=0, **_labelGrid
+        )
+        self.entryTotalAmount.grid(
+            column=3, row=0, **_entryGrid
+        )
+
+        self.labelTotalPrice.grid(
+            column=4, row=0, **_labelGrid
+        )
+        self.entryTotalPrice.grid(
+            column=5, row=0, **_entryGrid
+        )
+
+        for entry in self._entries:
+            entry['state'] = 'readonly'
+
 class AddWindow(Toplevel):
     def __init__(self, parent, master=None):
         Toplevel.__init__(self, master)
@@ -110,7 +197,7 @@ class AddItemFrame(ttk.Frame):
     def initComponents(self):
         self.pack(fill=tk.BOTH, expand=True)
 
-        vcmd = (self.register(self.validate),
+        vcmd = (self.register(self.mainframe.validate),
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
 
         self.labelName = displayLabel(self, text="Name:")
@@ -165,17 +252,6 @@ class AddItemFrame(ttk.Frame):
             column=3, row=3, **_buttonGrid
         )
 
-    def validate(self, action, index, value_if_allowed,
-                       prior_value, text, validation_type, trigger_type, widget_name):
-        if value_if_allowed:
-            try:
-                float(value_if_allowed)
-                return True
-            except ValueError:
-                return False
-        else:
-            return False
-
     def Cancel(self):
         self.parent.destroy()
 
@@ -216,7 +292,7 @@ class EditItemFrame(ttk.Frame):
     def initComponents(self):
         self.pack(fill=tk.BOTH, expand=True)
 
-        vcmd = (self.register(self.validate),
+        vcmd = (self.register(self.mainframe.validate),
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
 
         self.labelIndex = displayLabel(self, text="Item Index:")
@@ -309,19 +385,6 @@ class EditItemFrame(ttk.Frame):
         self.entryAmount.set_text(self._itemAmount)
         self._itemPrice = self._items[i].price
         self.entryPrice.set_text(self._itemPrice)
-
-    def validate(self, action, index, value_if_allowed,
-                       prior_value, text, validation_type, trigger_type, widget_name):
-        if value_if_allowed:
-            try:
-                float(value_if_allowed)
-                return True
-            except ValueError:
-                return False
-        elif value_if_allowed is "":
-            return True
-        else:
-            return False
 
     def Cancel(self):
         self.parent.destroy()
@@ -472,13 +535,13 @@ class DeleteItemFrame(ttk.Frame):
         self.parent.destroy()
 
 class displayLabel(ttk.Label):
-    def __init__(self, parent, width=25, anchor="e", relief=tk.FLAT, **kw):
-        ttk.Label.__init__(self, parent, width=width, anchor=anchor, relief=relief, **kw)
+    def __init__(self, parent, width=25, anchor="e", relief=tk.FLAT, **kwargs):
+        ttk.Label.__init__(self, parent, width=width, anchor=anchor, relief=relief, **kwargs)
         self.parent = parent
 
 class displayEntry(ttk.Entry):
-    def __init__(self, parent, width=40, **kw):
-        ttk.Entry.__init__(self, parent, width=width, **kw)
+    def __init__(self, parent, width=40, **kwargs):
+        ttk.Entry.__init__(self, parent, width=width, **kwargs)
         self.parent = parent
 
     def set_text(self, text):
@@ -486,13 +549,13 @@ class displayEntry(ttk.Entry):
         self.insert(0,text)
 
 class displayCombobox(ttk.Combobox):
-    def __init__(self, parent, width=40, **kw):
-        ttk.Combobox.__init__(self, parent, width=width, **kw)
+    def __init__(self, parent, width=40, **kwargs):
+        ttk.Combobox.__init__(self, parent, width=width, **kwargs)
         self.parent = parent
 
 class displayButton(ttk.Button):
-    def __init__(self, parent, width=30, padding="5 5 5 5", **kw):
-        ttk.Button.__init__(self, parent, width=width, padding=padding, **kw)
+    def __init__(self, parent, width=30, padding="5 5 5 5", **kwargs):
+        ttk.Button.__init__(self, parent, width=width, padding=padding, **kwargs)
         self.parent = parent
 
 if __name__ == "__main__":
