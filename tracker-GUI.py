@@ -284,8 +284,8 @@ class AddItemFrame(ttk.Frame):
         self.entryAmount = displayEntry(self, textvariable=self._itemAmount, validate='key', validatecommand=self.mainframe.vcmd)
         self.entryPrice = displayEntry(self, textvariable=self._itemPrice, validate='key', validatecommand=self.mainframe.vcmd)
         # Create buttons
-        self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
-        self.enterButton = displayButton(self, text="Enter", command=self.AddItem)
+        self.buttonCancel = displayButton(self, text="Cancel", command=self.Cancel)
+        self.buttonConfirm = displayButton(self, text="Confirm Add", command=self.AddItem)
         # Grid padding
         _labelGrid = {"padx":2, "pady":2}
         _entryGrid = {"padx":2, "pady":2}
@@ -315,10 +315,10 @@ class AddItemFrame(ttk.Frame):
         self.entryPrice.grid(
             column=3, row=1, **_entryGrid
         )
-        self.cancelButton.grid(
+        self.buttonCancel.grid(
             column=2, row=3, **_buttonGrid
         )
-        self.enterButton.grid(
+        self.buttonConfirm.grid(
             column=3, row=3, **_buttonGrid
         )
 
@@ -387,9 +387,9 @@ class EditItemFrame(ttk.Frame):
         def ComboboxCallback(*args):                            # Update the entries displayed when the input changes in the combobox
             self.RefreshData(int(self.comboboxIndex.get())-1)
         self.comboboxIndex.bind("<<ComboboxSelected>>", ComboboxCallback)
-        # create the Cancel and Enter button objects, "Cancel" to close the window and "Enter" to change the Item object's data to the new values
-        self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
-        self.enterButton = displayButton(self, text="Enter", command=self.EditItem)
+        # create the Cancel and Confirm button objects, "Cancel" to close the window and "Confirm Edit" to change the Item object's data to the new values
+        self.buttonCancel = displayButton(self, text="Cancel", command=self.Cancel)
+        self.buttonConfirm = displayButton(self, text="Confirm Edit", command=self.EditItem)
         # Grid padding
         _labelGrid = {"padx":2, "pady":2}
         _entryGrid = {"padx":2, "pady":2}
@@ -425,10 +425,10 @@ class EditItemFrame(ttk.Frame):
         self.entryPrice.grid(
             column=3, row=2, **_entryGrid
         )
-        self.cancelButton.grid(
+        self.buttonCancel.grid(
             column=2, row=3, **_buttonGrid
         )
-        self.enterButton.grid(
+        self.buttonConfirm.grid(
             column=3, row=3, **_buttonGrid
         )
 
@@ -504,9 +504,9 @@ class DeleteItemFrame(ttk.Frame):
         def ComboboxCallback(*args):                # Update the entries displayed when the input changes in the combobox
             self.RefreshData(int(self.comboboxIndex.get())-1)
         self.comboboxIndex.bind("<<ComboboxSelected>>", ComboboxCallback)
-        # create the Cancel and Enter button objects, "Cancel" to close the window and "Enter" to delete the selected Item from the items list 
-        self.cancelButton = displayButton(self, text="Cancel", command=self.Cancel)
-        self.enterButton = displayButton(self, text="Enter", command=self.DeleteItem)
+        # create the Cancel and Confirm button objects, "Cancel" to close the window and "Confirm Delete" to delete the selected Item from the items list 
+        self.buttonCancel = displayButton(self, text="Cancel", command=self.Cancel)
+        self.buttonConfirm = displayButton(self, text="Confirm Delete", command=self.DeleteItem)
         # Grid padding
         _labelGrid = {"padx":2, "pady":2}
         _entryGrid = {"padx":2, "pady":2}
@@ -542,10 +542,10 @@ class DeleteItemFrame(ttk.Frame):
         self.entryPrice.grid(
             column=3, row=2, **_entryGrid
         )
-        self.cancelButton.grid(
+        self.buttonCancel.grid(
             column=2, row=3, **_buttonGrid
         )
-        self.enterButton.grid(
+        self.buttonConfirm.grid(
             column=3, row=3, **_buttonGrid
         )
 
